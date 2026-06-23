@@ -33,7 +33,7 @@ tplinked gives old hardware a second life by creating useful local networks for:
 
 Tested on:
 
-- TP-Link TL-WR740N
+- TP-Link TL-WR740N v4.20
 
 ## Software
 
