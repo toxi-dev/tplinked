@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,35 +8,54 @@
 </head>
 <body>
 
-<div class="container">
+<div class="header">
     <h1>tplinked</h1>
-    <p class="subtitle">A Portable Offline Network</p>
-
-    <div class="status">
-        <div class="card">
-            <h2>Network Status</h2>
-            <p>🟢 Online</p>
-        </div>
-
-        <div class="card">
-            <h2>Connected Devices</h2>
-            <p id="devices">0</p>
-        </div>
-    </div>
-
-    <div class="services">
-        <a href="#" class="service">💬 Chat</a>
-        <a href="#" class="service">📁 File Share</a>
-        <a href="#" class="service">📢 Bulletin Board</a>
-        <a href="#" class="service">📚 Wiki</a>
-        <a href="#" class="service">📡 Network Map</a>
-    </div>
-
-    <footer>
-        tplinked © 2026
-    </footer>
+    <div id="clock">00:00:00</div>
 </div>
 
-<script src="app.js"></script>
+<div class="grid">
+
+    <div class="card">
+        <h2>Network Status</h2>
+        <p>🟢 ONLINE</p>
+        <p>SSID: tplinked</p>
+    </div>
+
+    <div class="card">
+        <h2>Connected Devices</h2>
+        <ul>
+            <li>📱 Samsung A14</li>
+            <li>💻 Lenovo Laptop</li>
+            <li>🖥️ Raspberry Pi</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2>Router Health</h2>
+        <p>CPU: 12%</p>
+        <p>Memory: 48%</p>
+        <p>Uptime: 5h 22m</p>
+    </div>
+
+    <div class="card">
+        <h2>Statistics</h2>
+        <p>Files Shared: 0</p>
+        <p>Messages Sent: 0</p>
+        <p>Devices Seen: 3</p>
+    </div>
+
+</div>
+
+<div class="radar-card">
+    <h2>Network Radar</h2>
+    <canvas id="radar" width="500" height="500"></canvas>
+</div>
+
+<div class="terminal-card">
+    <h2>Activity Feed</h2>
+    <div id="terminal"></div>
+</div>
+
 </body>
+<script src="app.js"></script>
 </html>
