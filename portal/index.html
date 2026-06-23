@@ -1,61 +1,168 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>tplinked</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tplinked</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="bg-grid"></div>
 
-<div class="header">
-    <h1>tplinked</h1>
-    <div id="clock">00:00:00</div>
-</div>
-
-<div class="grid">
-
-    <div class="card">
-        <h2>Network Status</h2>
-        <p>🟢 ONLINE</p>
-        <p>SSID: tplinked</p>
+  <header class="topbar">
+    <div>
+      <h1>tplinked</h1>
+      <p>Offline router-powered community network</p>
     </div>
-
-    <div class="card">
-        <h2>Connected Devices</h2>
-        <ul>
-            <li>📱 Samsung A14</li>
-            <li>💻 Lenovo Laptop</li>
-            <li>🖥️ Raspberry Pi</li>
-        </ul>
+    <div class="top-status">
+      <span id="statusDot" class="dot warning"></span>
+      <span id="routerStatus">Waiting for router</span>
+      <strong id="clock">00:00:00</strong>
     </div>
+  </header>
 
-    <div class="card">
-        <h2>Router Health</h2>
-        <p>CPU: 12%</p>
-        <p>Memory: 48%</p>
-        <p>Uptime: 5h 22m</p>
-    </div>
+  <nav class="nav">
+    <button class="nav-btn active" data-page="dashboard">Dashboard</button>
+    <button class="nav-btn" data-page="chat">Chat</button>
+    <button class="nav-btn" data-page="bulletin">Bulletin</button>
+    <button class="nav-btn" data-page="wiki">Wiki</button>
+    <button class="nav-btn" data-page="files">Files</button>
+  </nav>
 
-    <div class="card">
-        <h2>Statistics</h2>
-        <p>Files Shared: 0</p>
-        <p>Messages Sent: 0</p>
-        <p>Devices Seen: 3</p>
-    </div>
+  <main>
+    <section id="dashboard" class="page active">
+      <div class="cards">
+        <article class="card">
+          <h2>Network</h2>
+          <p class="big" id="ssid">tplinked</p>
+          <p id="lastUpdate">Status file not loaded yet.</p>
+        </article>
 
-</div>
+        <article class="card">
+          <h2>Devices</h2>
+          <p class="big" id="deviceCount">0</p>
+          <p>Real DHCP leases from the router.</p>
+        </article>
 
-<div class="radar-card">
-    <h2>Network Radar</h2>
-    <canvas id="radar" width="500" height="500"></canvas>
-</div>
+        <article class="card">
+          <h2>Router Health</h2>
+          <p>Uptime: <strong id="uptime">Unknown</strong></p>
+          <p>Memory: <strong id="memory">Unknown</strong></p>
+        </article>
 
-<div class="terminal-card">
-    <h2>Activity Feed</h2>
-    <div id="terminal"></div>
-</div>
+        <article class="card">
+          <h2>Mode</h2>
+          <p class="big">LOCAL</p>
+          <p>No internet required.</p>
+        </article>
+      </div>
 
+      <div class="split">
+        <article class="panel">
+          <h2>Connected Devices</h2>
+          <div id="devicesList" class="device-list">
+            <p class="muted">No router data yet.</p>
+          </div>
+        </article>
+
+        <article class="panel">
+          <h2>Network Radar</h2>
+          <canvas id="radar" width="420" height="420"></canvas>
+        </article>
+      </div>
+
+      <article class="panel">
+        <h2>Activity Feed</h2>
+        <div id="activity" class="terminal"></div>
+      </article>
+    </section>
+
+    <section id="chat" class="page">
+      <article class="panel">
+        <h2>Local Chat</h2>
+        <p class="muted">
+          Lightweight chat pad for the portal. Saves on this browser. Shared router chat can be added later with CGI.
+        </p>
+
+        <div class="form-row">
+          <input id="chatName" placeholder="Name" maxlength="20" />
+          <input id="chatText" placeholder="Message" maxlength="180" />
+          <button id="sendChat">Send</button>
+        </div>
+
+        <div id="chatBox" class="chat-box"></div>
+
+        <button id="clearChat" class="danger">Clear Chat</button>
+      </article>
+    </section>
+
+    <section id="bulletin" class="page">
+      <article class="panel">
+        <h2>Bulletin Board</h2>
+        <p class="muted">Announcements, event info, emergency messages, or school notes.</p>
+
+        <div class="form-row">
+          <input id="bulletinText" placeholder="Post an announcement..." maxlength="220" />
+          <button id="postBulletin">Post</button>
+        </div>
+
+        <div id="bulletinList" class="post-list"></div>
+
+        <button id="clearBulletin" class="danger">Clear Bulletin</button>
+      </article>
+    </section>
+
+    <section id="wiki" class="page">
+      <article class="panel">
+        <h2>Offline Wiki</h2>
+
+        <div class="wiki-grid">
+          <div class="wiki-card">
+            <h3>What is tplinked?</h3>
+            <p>tplinked turns an old TP-Link router into a tiny offline network hub for sharing information without internet.</p>
+          </div>
+
+          <div class="wiki-card">
+            <h3>How to connect</h3>
+            <p>Join the Wi-Fi network named tplinked, then open the portal page from the router.</p>
+          </div>
+
+          <div class="wiki-card">
+            <h3>Emergency use</h3>
+            <p>Use the bulletin board for important updates and the wiki for offline instructions or event information.</p>
+          </div>
+
+          <div class="wiki-card">
+            <h3>Hardware</h3>
+            <p>Built for the TP-Link TL-WR740N v4.20 running a very lightweight OpenWrt-friendly portal.</p>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section id="files" class="page">
+      <article class="panel">
+        <h2>Offline File Notes</h2>
+        <p class="muted">
+          Add file links, filenames, or notes here. This keeps the router lightweight and avoids filling its tiny flash.
+        </p>
+
+        <div class="form-row">
+          <input id="fileNote" placeholder="Example: safety-guide.pdf - available from admin laptop" maxlength="220" />
+          <button id="addFileNote">Add</button>
+        </div>
+
+        <div id="fileList" class="post-list"></div>
+
+        <button id="clearFiles" class="danger">Clear File Notes</button>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    tplinked · built for old routers · offline first
+  </footer>
+
+  <script src="app.js"></script>
 </body>
-<script src="app.js"></script>
 </html>
