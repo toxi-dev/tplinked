@@ -79,6 +79,15 @@ function formatUptime(seconds) {
   return `${mins}m`;
 }
 
+function escapeHtml(text) {
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 function renderDevices(devices) {
   devicesList.innerHTML = "";
 
@@ -152,6 +161,85 @@ async function loadRouterStatus() {
 setInterval(loadRouterStatus, 5000);
 loadRouterStatus();
 
+async function renderChat() {
+  try {
+    const res = await fetch("/cgi-bin/tplinked-chat?action=read&_=" + Date.now(), {
+      cache: "no-store"
+    });
+
+    if (!res.ok) throw new Error("Chat script not available");
+
+    const data = await res.json();
+    const messages = data.messages || [];
+
+    chatBox.innerHTML = "";
+
+    if (messages.length === 0) {
+      chatBox.innerHTML = `<p class="muted">No shared chat messages yet.</p>`;
+      return;
+    }
+
+    messages.slice().reverse().forEach((msg) => {
+      const div = document.createElement("div");
+      div.className = "message";
+      div.innerHTML = `
+        <strong>${escapeHtml(msg.name)}</strong>
+        <span class="muted"> ${escapeHtml(msg.time)}</span>
+        <br>
+        ${escapeHtml(msg.text)}
+      `;
+      chatBox.appendChild(div);
+    });
+  } catch (err) {
+    chatBox.innerHTML = `<p class="muted">Shared chat script not installed or not reachable.</p>`;
+  }
+}
+
+sendChat.addEventListener("click", async () => {
+  const name = chatName.value.trim() || "Guest";
+  const text = chatText.value.trim();
+
+  if (!text) return;
+
+  const body = new URLSearchParams();
+  body.set("name", name);
+  body.set("text", text);
+
+  try {
+    await fetch("/cgi-bin/tplinked-chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: body.toString()
+    });
+
+    chatText.value = "";
+    await renderChat();
+    addActivity("Shared chat message sent");
+  } catch (err) {
+    addActivity("Chat send failed");
+  }
+});
+
+chatText.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") sendChat.click();
+});
+
+clearChat.addEventListener("click", async () => {
+  try {
+    await fetch("/cgi-bin/tplinked-chat?action=clear&_=" + Date.now(), {
+      cache: "no-store"
+    });
+    await renderChat();
+    addActivity("Shared chat cleared");
+  } catch (err) {
+    addActivity("Chat clear failed");
+  }
+});
+
+setInterval(renderChat, 2000);
+
 function saveLocal(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
@@ -163,66 +251,6 @@ function loadLocal(key) {
     return [];
   }
 }
-
-function escapeHtml(text) {
-  return String(text)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function renderChat() {
-  const messages = loadLocal("tplinked_chat");
-  chatBox.innerHTML = "";
-
-  if (messages.length === 0) {
-    chatBox.innerHTML = `<p class="muted">No chat messages yet.</p>`;
-    return;
-  }
-
-  messages.slice().reverse().forEach((msg) => {
-    const div = document.createElement("div");
-    div.className = "message";
-    div.innerHTML = `
-      <strong>${escapeHtml(msg.name)}</strong>
-      <span class="muted"> ${escapeHtml(msg.time)}</span>
-      <br>
-      ${escapeHtml(msg.text)}
-    `;
-    chatBox.appendChild(div);
-  });
-}
-
-sendChat.addEventListener("click", () => {
-  const name = chatName.value.trim() || "Guest";
-  const text = chatText.value.trim();
-
-  if (!text) return;
-
-  const messages = loadLocal("tplinked_chat");
-  messages.push({
-    name,
-    text,
-    time: nowTime()
-  });
-
-  saveLocal("tplinked_chat", messages);
-  chatText.value = "";
-  renderChat();
-  addActivity("Local chat message saved");
-});
-
-chatText.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") sendChat.click();
-});
-
-clearChat.addEventListener("click", () => {
-  localStorage.removeItem("tplinked_chat");
-  renderChat();
-  addActivity("Local chat cleared");
-});
 
 function renderBulletin() {
   const posts = loadLocal("tplinked_bulletin");
@@ -256,7 +284,7 @@ postBulletin.addEventListener("click", () => {
   saveLocal("tplinked_bulletin", posts);
   bulletinText.value = "";
   renderBulletin();
-  addActivity("Bulletin post saved");
+  addActivity("Bulletin post saved on this device");
 });
 
 bulletinText.addEventListener("keydown", (e) => {
@@ -266,7 +294,7 @@ bulletinText.addEventListener("keydown", (e) => {
 clearBulletin.addEventListener("click", () => {
   localStorage.removeItem("tplinked_bulletin");
   renderBulletin();
-  addActivity("Bulletin cleared");
+  addActivity("Bulletin cleared on this device");
 });
 
 function renderFiles() {
@@ -301,7 +329,7 @@ addFileNote.addEventListener("click", () => {
   saveLocal("tplinked_files", files);
   fileNote.value = "";
   renderFiles();
-  addActivity("File note saved");
+  addActivity("File note saved on this device");
 });
 
 fileNote.addEventListener("keydown", (e) => {
@@ -311,7 +339,7 @@ fileNote.addEventListener("keydown", (e) => {
 clearFiles.addEventListener("click", () => {
   localStorage.removeItem("tplinked_files");
   renderFiles();
-  addActivity("File notes cleared");
+  addActivity("File notes cleared on this device");
 });
 
 renderChat();
