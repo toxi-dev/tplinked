@@ -1,2 +1,59 @@
 # tplinked
-tplinked turns a TP-Link TL-WR740N into a portable offline network hub. Anyone nearby can connect to its Wi-Fi and access chat, file sharing, announcements, and helpful local resources without needing internet.
+
+Transforming a TP-Link TL-WR740N into a portable offline network hub.
+
+## What is tplinked?
+
+tplinked is an OpenWrt-powered project that turns old TP-Link routers into self-contained digital communities.
+
+Users can connect to the router's Wi-Fi and access:
+
+- Local chat
+- File sharing
+- Community bulletin board
+- Offline wiki
+- Network dashboard
+- Device discovery
+
+No internet required.
+
+## Why?
+
+Millions of routers end up as e-waste despite still being functional.
+
+tplinked gives old hardware a second life by creating useful local networks for:
+
+- Schools
+- Events
+- Hackathons
+- Emergency communications
+- Community projects
+
+## Hardware
+
+Tested on:
+
+- TP-Link TL-WR740N
+
+## Software
+
+- OpenWrt
+- nginx/uhttpd
+- PHP
+- JavaScript
+- HTML/CSS
+
+## Roadmap
+
+- [ ] Captive portal
+- [ ] Dashboard
+- [ ] Chat system
+- [ ] File sharing
+- [ ] Bulletin board
+- [ ] Wiki
+- [ ] Device scanner
+- [ ] Mobile UI
+
+## License
+
+MIT
