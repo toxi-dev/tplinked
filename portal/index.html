@@ -7,17 +7,16 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="bg-grid"></div>
 
-  <header class="topbar">
+  <header class="header">
     <div>
       <h1>tplinked</h1>
-      <p>Offline router-powered community network</p>
+      <p>Local network tools for OpenWrt routers.</p>
     </div>
-    <div class="top-status">
+
+    <div class="router-pill">
       <span id="statusDot" class="dot warning"></span>
-      <span id="routerStatus">Waiting for router</span>
-      <strong id="clock">00:00:00</strong>
+      <span id="routerStatus">Checking router</span>
     </div>
   </header>
 
@@ -31,57 +30,95 @@
 
   <main>
     <section id="dashboard" class="page active">
-      <div class="cards">
-        <article class="card">
-          <h2>Network</h2>
-          <p class="big" id="ssid">tplinked</p>
-          <p id="lastUpdate">Status file not loaded yet.</p>
+
+      <section class="hero">
+        <div>
+          <h2>Router Portal</h2>
+          <p>
+            tplinked runs directly on the router and gives connected devices a simple local portal,
+            shared chat, notes, and live network status.
+          </p>
+        </div>
+
+        <div class="hero-time">
+          <span id="clock">00:00:00</span>
+          <small>Local time</small>
+        </div>
+      </section>
+
+      <section class="stats-grid">
+        <article class="stat-card">
+          <span class="label">SSID</span>
+          <strong id="ssid">tplinked</strong>
         </article>
 
-        <article class="card">
-          <h2>Devices</h2>
-          <p class="big" id="deviceCount">0</p>
-          <p>Real DHCP leases from the router.</p>
+        <article class="stat-card">
+          <span class="label">Connected Devices</span>
+          <strong id="deviceCount">0</strong>
         </article>
 
-        <article class="card">
-          <h2>Router Health</h2>
-          <p>Uptime: <strong id="uptime">Unknown</strong></p>
-          <p>Memory: <strong id="memory">Unknown</strong></p>
+        <article class="stat-card">
+          <span class="label">Uptime</span>
+          <strong id="uptime">Loading</strong>
         </article>
 
-        <article class="card">
-          <h2>Mode</h2>
-          <p class="big">LOCAL</p>
-          <p>No internet required.</p>
+        <article class="stat-card">
+          <span class="label">Memory Used</span>
+          <strong id="memory">Loading</strong>
         </article>
-      </div>
+      </section>
 
-      <div class="split">
+      <section class="two-col">
         <article class="panel">
-          <h2>Connected Devices</h2>
+          <div class="panel-title">
+            <h2>Connected Devices</h2>
+            <span id="lastUpdate">Waiting for status</span>
+          </div>
+
           <div id="devicesList" class="device-list">
-            <p class="muted">No router data yet.</p>
+            <p class="muted">No device data yet.</p>
           </div>
         </article>
 
         <article class="panel">
-          <h2>Network Radar</h2>
-          <canvas id="radar" width="420" height="420"></canvas>
+          <h2>System Info</h2>
+
+          <div class="info-list">
+            <div>
+              <span>Mode</span>
+              <strong>Offline-first</strong>
+            </div>
+
+            <div>
+              <span>Chat Storage</span>
+              <strong>Router RAM</strong>
+            </div>
+
+            <div>
+              <span>Flash-safe</span>
+              <strong>Yes</strong>
+            </div>
+
+            <div>
+              <span>Internet Required</span>
+              <strong>No</strong>
+            </div>
+          </div>
         </article>
-      </div>
+      </section>
 
       <article class="panel">
-        <h2>Activity Feed</h2>
+        <h2>Activity</h2>
         <div id="activity" class="terminal"></div>
       </article>
+
     </section>
 
     <section id="chat" class="page">
       <article class="panel">
-        <h2>Local Chat</h2>
+        <h2>Shared Chat</h2>
         <p class="muted">
-          Lightweight chat pad for the portal. Saves on this browser. Shared router chat can be added later with CGI.
+          Messages are shared between devices connected to this router. They reset when the router reboots.
         </p>
 
         <div class="form-row">
@@ -99,7 +136,7 @@
     <section id="bulletin" class="page">
       <article class="panel">
         <h2>Bulletin Board</h2>
-        <p class="muted">Announcements, event info, emergency messages, or school notes.</p>
+        <p class="muted">Local announcements and notes for people connected to the router.</p>
 
         <div class="form-row">
           <input id="bulletinText" placeholder="Post an announcement..." maxlength="220" />
@@ -118,23 +155,23 @@
 
         <div class="wiki-grid">
           <div class="wiki-card">
-            <h3>What is tplinked?</h3>
-            <p>tplinked turns an old TP-Link router into a tiny offline network hub for sharing information without internet.</p>
+            <h3>About</h3>
+            <p>tplinked turns old OpenWrt routers into small offline network hubs.</p>
           </div>
 
           <div class="wiki-card">
-            <h3>How to connect</h3>
-            <p>Join the Wi-Fi network named tplinked, then open the portal page from the router.</p>
+            <h3>Connecting</h3>
+            <p>Join the router Wi-Fi, then open the router address in your browser.</p>
           </div>
 
           <div class="wiki-card">
-            <h3>Emergency use</h3>
-            <p>Use the bulletin board for important updates and the wiki for offline instructions or event information.</p>
+            <h3>Use cases</h3>
+            <p>Events, classrooms, workshops, emergency notes, and local communication.</p>
           </div>
 
           <div class="wiki-card">
             <h3>Hardware</h3>
-            <p>Built for the TP-Link TL-WR740N v4.20 running a very lightweight OpenWrt-friendly portal.</p>
+            <p>Designed to stay lightweight for small routers like the TP-Link TL-WR740N.</p>
           </div>
         </div>
       </article>
@@ -142,13 +179,13 @@
 
     <section id="files" class="page">
       <article class="panel">
-        <h2>Offline File Notes</h2>
+        <h2>File Notes</h2>
         <p class="muted">
-          Add file links, filenames, or notes here. This keeps the router lightweight and avoids filling its tiny flash.
+          Save filenames, links, or notes without filling the router flash with uploads.
         </p>
 
         <div class="form-row">
-          <input id="fileNote" placeholder="Example: safety-guide.pdf - available from admin laptop" maxlength="220" />
+          <input id="fileNote" placeholder="Example: notes.pdf - available from admin laptop" maxlength="220" />
           <button id="addFileNote">Add</button>
         </div>
 
@@ -160,7 +197,7 @@
   </main>
 
   <footer>
-    tplinked · built for old routers · offline first
+    tplinked · OpenWrt local portal
   </footer>
 
   <script src="app.js"></script>

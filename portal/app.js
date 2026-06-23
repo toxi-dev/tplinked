@@ -28,11 +28,16 @@ const addFileNote = qs("#addFileNote");
 const fileList = qs("#fileList");
 const clearFiles = qs("#clearFiles");
 
-let deviceRadarPoints = [];
-
 function nowTime() {
   return new Date().toLocaleTimeString();
 }
+
+function updateClock() {
+  clock.textContent = nowTime();
+}
+
+setInterval(updateClock, 1000);
+updateClock();
 
 function addActivity(text) {
   const item = document.createElement("div");
@@ -45,12 +50,14 @@ function addActivity(text) {
   }
 }
 
-function updateClock() {
-  clock.textContent = nowTime();
+function escapeHtml(text) {
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
-
-setInterval(updateClock, 1000);
-updateClock();
 
 qsa(".nav-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
@@ -63,9 +70,12 @@ qsa(".nav-btn").forEach((btn) => {
 });
 
 function formatUptime(seconds) {
-  if (!seconds && seconds !== 0) return "Unknown";
-
   seconds = Number(seconds);
+
+  if (Number.isNaN(seconds)) {
+    return "Unavailable";
+  }
+
   const days = Math.floor(seconds / 86400);
   seconds %= 86400;
 
@@ -79,29 +89,13 @@ function formatUptime(seconds) {
   return `${mins}m`;
 }
 
-function escapeHtml(text) {
-  return String(text)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
 function renderDevices(devices) {
   devicesList.innerHTML = "";
 
   if (!devices || devices.length === 0) {
-    devicesList.innerHTML = `<p class="muted">No connected DHCP devices found yet.</p>`;
-    deviceRadarPoints = [];
+    devicesList.innerHTML = `<p class="muted">No connected DHCP devices found.</p>`;
     return;
   }
-
-  deviceRadarPoints = devices.map((_, index) => {
-    const angle = (Math.PI * 2 / devices.length) * index;
-    const radius = 70 + ((index * 47) % 130);
-    return { angle, radius };
-  });
 
   devices.forEach((device) => {
     const div = document.createElement("div");
@@ -125,9 +119,13 @@ function renderDevices(devices) {
 
 async function loadRouterStatus() {
   try {
-    const res = await fetch("status.json?_=" + Date.now(), { cache: "no-store" });
+    const res = await fetch("status.json?_=" + Date.now(), {
+      cache: "no-store"
+    });
 
-    if (!res.ok) throw new Error("No status file");
+    if (!res.ok) {
+      throw new Error("Status file missing");
+    }
 
     const data = await res.json();
 
@@ -137,23 +135,30 @@ async function loadRouterStatus() {
     ssid.textContent = data.ssid || "tplinked";
     deviceCount.textContent = data.device_count ?? 0;
     uptime.textContent = formatUptime(data.uptime);
-    memory.textContent = data.memory_used_percent !== undefined
-      ? data.memory_used_percent + "%"
-      : "Unknown";
 
-    lastUpdate.textContent = data.generated
-      ? "Updated: " + data.generated
-      : "Updated from router";
+    if (data.memory_used_percent !== undefined && data.memory_used_percent !== null) {
+      memory.textContent = data.memory_used_percent + "%";
+    } else {
+      memory.textContent = "Unavailable";
+    }
+
+    if (data.generated) {
+      lastUpdate.textContent = "Updated " + data.generated;
+    } else {
+      lastUpdate.textContent = "Updated";
+    }
 
     renderDevices(data.devices || []);
   } catch (err) {
     statusDot.className = "dot warning";
-    routerStatus.textContent = "Portal only";
+    routerStatus.textContent = "Status unavailable";
 
-    lastUpdate.textContent = "Router status script not installed yet.";
+    ssid.textContent = "tplinked";
     deviceCount.textContent = "0";
-    uptime.textContent = "Unknown";
-    memory.textContent = "Unknown";
+    uptime.textContent = "Unavailable";
+    memory.textContent = "Unavailable";
+    lastUpdate.textContent = "Status script not found";
+
     renderDevices([]);
   }
 }
@@ -167,7 +172,9 @@ async function renderChat() {
       cache: "no-store"
     });
 
-    if (!res.ok) throw new Error("Chat script not available");
+    if (!res.ok) {
+      throw new Error("Chat script unavailable");
+    }
 
     const data = await res.json();
     const messages = data.messages || [];
@@ -182,16 +189,18 @@ async function renderChat() {
     messages.slice().reverse().forEach((msg) => {
       const div = document.createElement("div");
       div.className = "message";
+
       div.innerHTML = `
         <strong>${escapeHtml(msg.name)}</strong>
         <span class="muted"> ${escapeHtml(msg.time)}</span>
         <br>
         ${escapeHtml(msg.text)}
       `;
+
       chatBox.appendChild(div);
     });
   } catch (err) {
-    chatBox.innerHTML = `<p class="muted">Shared chat script not installed or not reachable.</p>`;
+    chatBox.innerHTML = `<p class="muted">Shared chat is not reachable.</p>`;
   }
 }
 
@@ -216,7 +225,7 @@ sendChat.addEventListener("click", async () => {
 
     chatText.value = "";
     await renderChat();
-    addActivity("Shared chat message sent");
+    addActivity("Chat message sent");
   } catch (err) {
     addActivity("Chat send failed");
   }
@@ -231,8 +240,9 @@ clearChat.addEventListener("click", async () => {
     await fetch("/cgi-bin/tplinked-chat?action=clear&_=" + Date.now(), {
       cache: "no-store"
     });
+
     await renderChat();
-    addActivity("Shared chat cleared");
+    addActivity("Chat cleared");
   } catch (err) {
     addActivity("Chat clear failed");
   }
@@ -264,12 +274,14 @@ function renderBulletin() {
   posts.slice().reverse().forEach((post) => {
     const div = document.createElement("div");
     div.className = "post";
+
     div.innerHTML = `
       <strong>Announcement</strong>
       <span class="muted"> ${escapeHtml(post.time)}</span>
       <br>
       ${escapeHtml(post.text)}
     `;
+
     bulletinList.appendChild(div);
   });
 }
@@ -309,12 +321,14 @@ function renderFiles() {
   files.slice().reverse().forEach((file) => {
     const div = document.createElement("div");
     div.className = "post";
+
     div.innerHTML = `
       <strong>File Note</strong>
       <span class="muted"> ${escapeHtml(file.time)}</span>
       <br>
       ${escapeHtml(file.text)}
     `;
+
     fileList.appendChild(div);
   });
 }
@@ -345,66 +359,4 @@ clearFiles.addEventListener("click", () => {
 renderChat();
 renderBulletin();
 renderFiles();
-addActivity("tplinked portal loaded");
-
-const canvas = qs("#radar");
-const ctx = canvas.getContext("2d");
-let angle = 0;
-
-function drawRadar() {
-  const w = canvas.width;
-  const h = canvas.height;
-  const cx = w / 2;
-  const cy = h / 2;
-  const max = Math.min(w, h) / 2 - 20;
-
-  ctx.clearRect(0, 0, w, h);
-
-  ctx.fillStyle = "#050b12";
-  ctx.fillRect(0, 0, w, h);
-
-  ctx.strokeStyle = "rgba(0,255,136,0.45)";
-  ctx.lineWidth = 1;
-
-  for (let r = max / 4; r <= max; r += max / 4) {
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.stroke();
-  }
-
-  ctx.beginPath();
-  ctx.moveTo(cx - max, cy);
-  ctx.lineTo(cx + max, cy);
-  ctx.moveTo(cx, cy - max);
-  ctx.lineTo(cx, cy + max);
-  ctx.stroke();
-
-  ctx.strokeStyle = "#00ff88";
-  ctx.lineWidth = 2;
-
-  ctx.beginPath();
-  ctx.moveTo(cx, cy);
-  ctx.lineTo(cx + Math.cos(angle) * max, cy + Math.sin(angle) * max);
-  ctx.stroke();
-
-  ctx.fillStyle = "#00ff88";
-
-  deviceRadarPoints.forEach((point) => {
-    const x = cx + Math.cos(point.angle) * point.radius;
-    const y = cy + Math.sin(point.angle) * point.radius;
-
-    ctx.beginPath();
-    ctx.arc(x, y, 5, 0, Math.PI * 2);
-    ctx.fill();
-  });
-
-  ctx.fillStyle = "#d9ffe9";
-  ctx.beginPath();
-  ctx.arc(cx, cy, 4, 0, Math.PI * 2);
-  ctx.fill();
-
-  angle += 0.025;
-  requestAnimationFrame(drawRadar);
-}
-
-drawRadar();
+addActivity("Portal loaded");
