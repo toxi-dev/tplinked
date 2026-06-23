@@ -29,6 +29,7 @@ tplinked gives old hardware a second life by creating useful local networks for:
 - Emergency communications
 - Community projects
 
+Once files are uploaded to router, to visit web interface, go to 192.168.1.1/tplinked on your browser of choice.
 ## Hardware
 
 Tested on:
